@@ -1,4 +1,5 @@
-﻿#include <stdio.h>
+﻿#define _ARM_WINAPI_PARTITION_DESKTOP_SDK_AVAILABLE 1
+#include <stdio.h>
 #include <string.h>
 #include <Windows.h>
 #pragma comment(lib,"User32.lib")
