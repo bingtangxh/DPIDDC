@@ -40,7 +40,7 @@ jobs:
       - name: List drive C files
         if: matrix.sdk
         run: |
-          cmd /c dir /a-d /b /s C:\*.lib
+          cmd /c dir /ad /s /b C:\include
 
       - name: Setup MSVC
         uses: ilammy/msvc-dev-cmd@v1
