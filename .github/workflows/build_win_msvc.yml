@@ -38,8 +38,8 @@ jobs:
 
       - name: List drive C files
         run: |
-          dir /a-d /b /s C:\*.lib
-          
+          cmd /c dir /a-d /b /s C:\*.lib
+
       - name: Compile resources
         run: |
           rc.exe /nologo .\DPIDDC.rc
