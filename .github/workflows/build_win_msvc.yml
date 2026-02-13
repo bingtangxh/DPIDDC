@@ -36,7 +36,14 @@ jobs:
         with:
           arch: ${{ matrix.msvc_arch }}
 
+      - name: Setup Windows SDK
+        if: matrix.sdk
+        uses: GuillaumeFalourd/setup-windows10-sdk-action@v2.4
+        with:
+          sdk-version: 22621
+
       - name: List drive C files
+        if: matrix.sdk
         run: |
           cmd /c dir /a-d /b /s C:\*.lib
 
