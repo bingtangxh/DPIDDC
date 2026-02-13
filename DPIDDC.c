@@ -4,11 +4,11 @@
 #pragma comment(lib,"User32.lib")
 #pragma comment(lib,"Advapi32.lib")
 #pragma comment(lib,"Kernel32.lib")
-#if defined _ARM || 1
+
 #pragma comment(linker,"\"/manifestdependency:type='win32' \
 name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
 processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
-#endif
+
 #ifndef _UNICODE
 #define _UNICODE
 #endif
@@ -196,7 +196,7 @@ void about(void){
     wchar_t aboutText[]=
         L"Digital Product Id Decoder Console Edition Bugfixed\n"
         L"\n"
-        L"Copyright (C) bingtangxh.\n"
+        L"Copyright (C) BingtangXH.\n"
         L"\n"
         L"May the Anemo God bless you.\n"
         L"\n"
@@ -208,7 +208,7 @@ void help(void){
     wchar_t helpText[]=
         L"将 DigitalProductId 注册表 DWORD 数值解码得到产品密钥。\n"
         L"\n"
-        L"Copyright (C) bingtangxh.\n"
+        L"Copyright (C) BingtangXH.\n"
         L"\n"
         L"DPIDDC [ /F digitalproductid | /? ]\n"
         L"\n"
