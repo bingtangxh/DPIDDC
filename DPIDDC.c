@@ -4,7 +4,7 @@
 #pragma comment(lib,"User32.lib")
 #pragma comment(lib,"Advapi32.lib")
 #pragma comment(lib,"Kernel32.lib")
-#ifdef _ARM
+#if defined _ARM || 1
 #pragma comment(linker,"\"/manifestdependency:type='win32' \
 name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
 processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
@@ -16,13 +16,13 @@ processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #define UNICODE
 #endif
 
-const signed char KEY_CHARSET[]="BCDFGHJKMPQRTVWXY2346789";
+const char KEY_CHARSET[]="BCDFGHJKMPQRTVWXY2346789";
 
 #define HEXVAL(hex) (hex-((hex>'9') ? ((hex<'a') ? 55 : 87) : 48))
 
 // int getHexVal(const char hex) { return hex-((hex>'9') ? ((hex<'a') ? 55 : 87) : 48); }
 void removeFrom(char *str,char remv);
-int string2ByteArrayFastest(const char * hex,char * result);
+int string2ByteArrayFastest(const char * hex,unsigned char * result);
 void decodePID(const unsigned char *digitalProductId,char *productKey);
 void about(void);
 void help(void);
@@ -32,27 +32,24 @@ int main(int argc,char **argv)
 {
     HKEY hKey;
     DWORD size=UCHAR_MAX;
-    char buf[UCHAR_MAX]="";
-    char rawInput[329];
-    char productKey[30];
-    wchar_t wProductKey[30];
-    wchar_t result[154]=L"本程序也可以从命令行运行，使用 /? 查看用法。\n你的产品密钥为： ";
-    char command[41];
-    unsigned char digitalProductId[164]="";
+    unsigned char buf[UCHAR_MAX]="",digitalProductId[164]="";
+    char rawInput[329],productKey[30],command[41];
+    wchar_t wProductKey[30],result[154]=L"本程序也可以从命令行运行，使用 /? 查看用法。\n你的产品密钥为： ";
     long unsigned int lpType=REG_BINARY;
+    long ORet=0,QRet=0;
     switch (argc)
     {
         case 1:
         {
             about();
-            long ORet=RegOpenKeyExA(HKEY_LOCAL_MACHINE,"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion",0,KEY_READ,&hKey);
+            ORet=RegOpenKeyExA(HKEY_LOCAL_MACHINE,"SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion",0,KEY_READ,&hKey);
             if (ORet!=ERROR_SUCCESS)
             {
                 printf("Failed to open the registry: \n%s\n%s\n","SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion","DigitalProductId");
                 return 3;
             } else
             {
-                long QRet=RegQueryValueExA(hKey,"DigitalProductId",NULL,&lpType,(BYTE*) buf,&size);
+                QRet=RegQueryValueExA(hKey,"DigitalProductId",NULL,&lpType,(BYTE*) buf,&size);
                 decodePID(buf,productKey);
                 MultiByteToWideChar(CP_ACP,0,productKey,-1,wProductKey,30);
                 wcsncat_s(result,154,wProductKey,29);
@@ -112,15 +109,12 @@ void removeFrom(char *str,char remv)
     int i,j=0;
     for (i=0; str[i]!='\0'; i++)
     {
-        if (str[i]!=remv)
-        {
-            str[j++]=str[i];
-        }
+        if (str[i]!=remv) { str[j++]=str[i]; }
     }
     str[j]='\0';
 }
 
-int string2ByteArrayFastest(const char * hex,char * result)
+int string2ByteArrayFastest(const char * hex,unsigned char * result)
 {
     if (strlen(hex)%2==0)
     {
@@ -140,7 +134,7 @@ int string2ByteArrayFastest(const char * hex,char * result)
 void decodePID(const unsigned char *digitalProductId,char *productKey) {
     // int bp=0;
     unsigned char pidBlock[16]="";
-    signed char decodedKey[30];
+    char decodedKey[30];
     // unsigned char digitalProductId2[164];
     // strcpy_s(digitalProductId2,164,digitalProductId);
     int isNKey=(digitalProductId[66]>>3)&1;
@@ -168,13 +162,13 @@ void decodePID(const unsigned char *digitalProductId,char *productKey) {
                 int temp=(num<<8)|pidBlock[j];
                 pidBlock[j]=(unsigned char) (temp/24);
                 num=temp%24;
-                decodedKey[i]=(signed char) KEY_CHARSET[num];
+                decodedKey[i]=KEY_CHARSET[num];
             }
         }
     }
     if (isNKey!=0)
     {
-        int nPos=0;
+        size_t nPos=0,currentLength=0;
         for (int i=0; i<24; i++) {
             if (decodedKey[0]==KEY_CHARSET[i]) {
                 nPos=i;
@@ -184,14 +178,16 @@ void decodePID(const unsigned char *digitalProductId,char *productKey) {
         decodedKey[29]='\0';
         removeFrom(decodedKey,'-');
         memmove(decodedKey,decodedKey+1,strlen(decodedKey));
-        size_t currentLength=strlen(decodedKey);
-        if (nPos>currentLength) nPos=(int) currentLength;
+        currentLength=strlen(decodedKey);
+        if (nPos>currentLength) { nPos=currentLength; }
         memmove(decodedKey+nPos+1,decodedKey+nPos,currentLength-nPos+1);
         decodedKey[nPos]='N';
     }
     decodedKey[29]='\0';
-    snprintf(productKey,30,"%5.5s-%5.5s-%5.5s-%5.5s-%5.5s",
-             decodedKey,decodedKey+5,decodedKey+10,decodedKey+15,decodedKey+20);
+    snprintf(productKey,30,
+             "%5.5s-%5.5s-%5.5s-%5.5s-%5.5s",
+             decodedKey,decodedKey+5,decodedKey+10,decodedKey+15,decodedKey+20
+    );
 }
 
 void about(void){

@@ -33,5 +33,8 @@
     <Image Include="..\..\Users\ruu\OneDrive\Develop\个性化\图标\原神\VentiSleep.ico">
       <Filter>资源文件</Filter>
     </Image>
+    <Image Include="VentiSleep.ico">
+      <Filter>资源文件</Filter>
+    </Image>
   </ItemGroup>
 </Project>
