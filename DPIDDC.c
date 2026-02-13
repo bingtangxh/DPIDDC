@@ -27,13 +27,15 @@ void decodePID(const unsigned char *digitalProductId,char *productKey);
 void about(void);
 void help(void);
 void printW(const wchar_t* wstr);
+_Bool copyToClipboard(const char *str);
 
 int main(int argc,char **argv)
 {
     HKEY hKey;
     DWORD size=UCHAR_MAX;
     unsigned char buf[UCHAR_MAX]="",digitalProductId[164]="";
-    char rawInput[329],productKey[30],command[41];
+    char rawInput[329],productKey[30];
+    // char command[41];
     wchar_t wProductKey[30],result[154]=L"本程序也可以从命令行运行，使用 /? 查看用法。\n你的产品密钥为： ";
     long unsigned int lpType=REG_BINARY;
     long ORet=0,QRet=0;
@@ -57,8 +59,9 @@ int main(int argc,char **argv)
                 RegCloseKey(hKey);
                 if (MessageBoxW(NULL,(LPCWSTR) result,L"DPIDDC",MB_ICONINFORMATION+MB_YESNO)==IDYES)
                 {
-                    snprintf(command,41,"echo %s| clip",productKey);
-                    system(command);
+                    // snprintf(command,41,"echo %s| clip",productKey);
+                    // system(command);
+                    copyToClipboard(productKey);
                 }
                 return 0;
             }
@@ -234,4 +237,20 @@ void printW(const wchar_t* wstr) {
 #else
     printf("%ls",wstr);
 #endif
+}
+
+_Bool copyToClipboard(const char *str) {
+    if (OpenClipboard(NULL)) {
+        EmptyClipboard();
+        HGLOBAL hGlob=GlobalAlloc(GMEM_FIXED,strlen(str)+1);
+        if (hGlob) {
+            memcpy(GlobalLock(hGlob),str,strlen(str)+1);
+            GlobalUnlock(hGlob);
+            SetClipboardData(CF_TEXT,hGlob);
+            CloseClipboard();
+            return 1;
+        }
+        CloseClipboard();
+    }
+    return 0;
 }
