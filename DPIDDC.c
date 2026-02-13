@@ -138,6 +138,7 @@ void decodePID(const unsigned char *digitalProductId,char *productKey) {
     // unsigned char digitalProductId2[164];
     // strcpy_s(digitalProductId2,164,digitalProductId);
     int isNKey=(digitalProductId[66]>>3)&1;
+    size_t nPos=0,currentLength=0;
 
     //digitalProductId2[66]=(unsigned char)((digitalProductId2[66]&0xF7)|((isNKey&2)<<2));
 
@@ -168,7 +169,6 @@ void decodePID(const unsigned char *digitalProductId,char *productKey) {
     }
     if (isNKey!=0)
     {
-        size_t nPos=0,currentLength=0;
         for (int i=0; i<24; i++) {
             if (decodedKey[0]==KEY_CHARSET[i]) {
                 nPos=i;
@@ -182,6 +182,8 @@ void decodePID(const unsigned char *digitalProductId,char *productKey) {
         if (nPos>currentLength) { nPos=currentLength; }
         memmove(decodedKey+nPos+1,decodedKey+nPos,currentLength-nPos+1);
         decodedKey[nPos]='N';
+    } else {
+        removeFrom(decodedKey,'-');
     }
     decodedKey[29]='\0';
     snprintf(productKey,30,
