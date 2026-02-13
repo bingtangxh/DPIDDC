@@ -37,16 +37,16 @@ jobs:
         with:
           sdk-version: 22621
 
+      - name: List drive C files
+        if: matrix.sdk
+        run: |
+          cmd /c dir /a-d /b /s C:\*.lib
+
       - name: Setup MSVC
         uses: ilammy/msvc-dev-cmd@v1
         with:
           arch: ${{ matrix.msvc_arch }} 
           sdk:  ${{ matrix.sdk }}
-
-      - name: List drive C files
-        if: matrix.sdk
-        run: |
-          cmd /c dir /a-d /b /s C:\*.lib
 
       - name: Compile resources
         run: |
